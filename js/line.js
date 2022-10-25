@@ -1,4 +1,4 @@
-import * as THREE from "/js/three.module.js";
+import * as THREE from "/js/three/three.module.js";
 
 const VIEW_ANGLE = 75; // 카메라 시야각. 커질 수록 시야각이 넓어짐. 단위는 degree
 const ASPECT = window.innerWidth / window.innerHeight; //시야의 가로세로비
@@ -32,9 +32,9 @@ function animate() {
   requestAnimationFrame(animate);
 
   const speed = Math.random() / 20;
-  // mesh.rotation.x += speed;
-  // mesh.rotation.y += speed;
-  // mesh.rotation.z += speed;
+  mesh.rotation.x += speed;
+  mesh.rotation.y += speed;
+  mesh.rotation.z += speed;
 
   renderer.render(scene, camera);
 }
