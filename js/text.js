@@ -20,10 +20,13 @@ fontLoader.load(fontPath + "gentilis_bold.typeface.json", (font) => {
 
   // 뼈대
   const geometry = new TextGeometry("text", {
-    font: font,
-    size: 1,
-    height: 0,
-    curveSegments: 1,
+    font: font, // fontLoader를 통해 얻어온 폰트 객체
+    size: 10, // mesh의 크기 (기본 값 100)
+    height: 0, // 깊이(z) (기본 값 50)
+    curveSegments: 1, // 하나의 커브를 구성하는 정점의 개수 (기본 값 12) = 값이 높을 수록 완벽한 곡선
+    bevelEnabled: true, // 베벨링 처리 여부 (기본 값 false)
+    bevelThickness: 0.5, // 베벨링 두께(z) (기본 값 10)
+    bevelSize: 0.5, // shape의 외곽선으로부터 얼마나 멀리 베벨링할 것인지에 대한 거리값 (기본 값 8)
   });
   geometry.computeBoundingBox();
 
@@ -37,15 +40,19 @@ fontLoader.load(fontPath + "gentilis_bold.typeface.json", (font) => {
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
 
+  const centerOffset =
+    -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+  mesh.position.x = centerOffset;
+
   camera.position.z = 20;
 
   function animate() {
     requestAnimationFrame(animate);
 
-    const speed = Math.random() / 20;
-    mesh.rotation.x += speed;
-    mesh.rotation.y += speed;
-    mesh.rotation.z += speed;
+    // const speed = Math.random() / 20;
+    // mesh.rotation.x += speed;
+    // mesh.rotation.y += speed;
+    // mesh.rotation.z += speed;
 
     renderer.render(scene, camera);
   }
