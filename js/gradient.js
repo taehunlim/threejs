@@ -1,6 +1,6 @@
 import * as THREE from "/js/three/three.module.js";
 
-let renderer, scene, camera, geometry, particles, planet;
+let renderer, scene, camera, geometry, particles, planet, skelet;
 
 window.onload = function () {
   init();
@@ -31,6 +31,7 @@ function init() {
 
   drawParticles();
   drawPlanet();
+  drawSkelet();
   setLights();
 
   window.addEventListener("resize", onWindowResize, false);
@@ -47,6 +48,11 @@ function animate() {
 
   particles.rotation.x += 0.0;
   particles.rotation.y -= 0.004;
+  planet.rotation.x -= 0.002;
+  planet.rotation.y -= 0.003;
+  skelet.rotation.x -= 0.001;
+  skelet.rotation.y += 0.002;
+
   renderer.clear();
 
   renderer.render(scene, camera);
@@ -55,7 +61,7 @@ function animate() {
 function drawParticles() {
   particles = new THREE.Group();
 
-  let material = new THREE.MeshPhongMaterial({
+  const material = new THREE.MeshPhongMaterial({
     color: 0xffffff,
     flatShading: true,
   });
@@ -74,15 +80,28 @@ function drawParticles() {
 }
 
 function drawPlanet() {
-  const planetMaterial = new THREE.MeshPhongMaterial({
+  const material = new THREE.MeshPhongMaterial({
     color: 0xffffff,
     flatShading: true,
   });
 
-  planet = new THREE.Mesh(geometry, planetMaterial);
+  planet = new THREE.Mesh(geometry, material);
   planet.scale.x = planet.scale.y = planet.scale.z = 35;
 
   scene.add(planet);
+}
+
+function drawSkelet() {
+  const material = new THREE.MeshPhongMaterial({
+    color: 0xffffff,
+    wireframe: true,
+    side: THREE.DoubleSide,
+  });
+
+  skelet = new THREE.Mesh(geometry, material);
+  skelet.scale.x = skelet.scale.y = skelet.scale.z = 50;
+
+  scene.add(skelet);
 }
 
 function setLights() {
