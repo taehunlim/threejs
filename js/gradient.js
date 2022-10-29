@@ -1,4 +1,5 @@
 import * as THREE from "/js/three/three.module.js";
+import { OrbitControls } from "/js/three/OrbitControls.js";
 
 let renderer, scene, camera, geometry, material, particles, planet, skelet;
 
@@ -32,6 +33,10 @@ function init() {
   drawSkelet();
   setLights();
 
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.update();
+  controls.maxDistance = 1000;
+  controls.minDistance = 50;
   window.addEventListener("resize", onWindowResize, false);
 }
 
