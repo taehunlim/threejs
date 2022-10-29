@@ -24,10 +24,10 @@ function init() {
     1000
   );
   camera.position.z = 400;
+
   scene.add(camera);
 
   particles = new THREE.Group();
-
   scene.add(particles);
 
   let geometry = new THREE.IcosahedronGeometry(2, 1);
@@ -37,16 +37,26 @@ function init() {
   });
   material.flatShading = true;
 
-  let mesh = new THREE.Mesh(geometry, material);
-  particles.add(mesh);
+  for (let i = 0; i < 1000; i++) {
+    let mesh = new THREE.Mesh(geometry, material);
+
+    mesh.position
+      .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+      .normalize();
+    mesh.position.multiplyScalar(90 + Math.random() * 700);
+
+    particles.add(mesh);
+  }
 
   let lights = [];
-  lights[0] = new THREE.DirectionalLight(0xffffff, 1);
+  lights.push(new THREE.DirectionalLight(0xffffff, 1));
+  lights.push(new THREE.DirectionalLight(0x9796f0, 1));
+  lights.push(new THREE.DirectionalLight(0xfbc7d4, 1));
+
   lights[0].position.set(1, 0, 0);
-  lights[1] = new THREE.DirectionalLight(0x9796f0, 1);
   lights[1].position.set(0.75, 1, 0.5);
-  lights[2] = new THREE.DirectionalLight(0xfbc7d4, 1);
   lights[2].position.set(-0.75, -1, 0.5);
+
   scene.add(lights[0]);
   scene.add(lights[1]);
   scene.add(lights[2]);
@@ -63,6 +73,8 @@ function onWindowResize() {
 function animate() {
   requestAnimationFrame(animate);
 
+  particles.rotation.x += 0.0;
+  particles.rotation.y -= 0.004;
   renderer.clear();
 
   renderer.render(scene, camera);
