@@ -1,6 +1,6 @@
 import * as THREE from "/js/three/three.module.js";
 
-let renderer, scene, camera, particles, planet;
+let renderer, scene, camera, geometry, particles, planet;
 
 window.onload = function () {
   init();
@@ -27,49 +27,11 @@ function init() {
 
   scene.add(camera);
 
-  particles = new THREE.Group();
+  geometry = new THREE.IcosahedronGeometry(2, 1);
 
-  let geometry = new THREE.IcosahedronGeometry(2, 1);
-
-  let material = new THREE.MeshPhongMaterial({
-    color: 0xffffff,
-    flatShading: true,
-  });
-
-  for (let i = 0; i < 1000; i++) {
-    let mesh = new THREE.Mesh(geometry, material);
-
-    mesh.position
-      .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
-      .normalize();
-    mesh.position.multiplyScalar(90 + Math.random() * 700);
-
-    particles.add(mesh);
-  }
-
-  const planetMaterial = new THREE.MeshPhongMaterial({
-    color: 0xffffff,
-    flatShading: true,
-  });
-
-  planet = new THREE.Mesh(geometry, planetMaterial);
-  planet.scale.x = planet.scale.y = planet.scale.z = 35;
-
-  scene.add(particles);
-  scene.add(planet);
-
-  let lights = [];
-  lights.push(new THREE.DirectionalLight(0xffffff, 1));
-  lights.push(new THREE.DirectionalLight(0x9796f0, 1));
-  lights.push(new THREE.DirectionalLight(0xfbc7d4, 1));
-
-  lights[0].position.set(1, 0, 0);
-  lights[1].position.set(0.75, 1, 0.5);
-  lights[2].position.set(-0.75, -1, 0.5);
-
-  scene.add(lights[0]);
-  scene.add(lights[1]);
-  scene.add(lights[2]);
+  drawParticles();
+  drawPlanet();
+  setLights();
 
   window.addEventListener("resize", onWindowResize, false);
 }
@@ -88,4 +50,52 @@ function animate() {
   renderer.clear();
 
   renderer.render(scene, camera);
+}
+
+function drawParticles() {
+  particles = new THREE.Group();
+
+  let material = new THREE.MeshPhongMaterial({
+    color: 0xffffff,
+    flatShading: true,
+  });
+
+  for (let i = 0; i < 1000; i++) {
+    let mesh = new THREE.Mesh(geometry, material);
+
+    mesh.position
+      .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+      .normalize();
+    mesh.position.multiplyScalar(90 + Math.random() * 700);
+
+    particles.add(mesh);
+  }
+  scene.add(particles);
+}
+
+function drawPlanet() {
+  const planetMaterial = new THREE.MeshPhongMaterial({
+    color: 0xffffff,
+    flatShading: true,
+  });
+
+  planet = new THREE.Mesh(geometry, planetMaterial);
+  planet.scale.x = planet.scale.y = planet.scale.z = 35;
+
+  scene.add(planet);
+}
+
+function setLights() {
+  let lights = [];
+  lights.push(new THREE.DirectionalLight(0xffffff, 1));
+  lights.push(new THREE.DirectionalLight(0x9796f0, 1));
+  lights.push(new THREE.DirectionalLight(0xfbc7d4, 1));
+
+  lights[0].position.set(1, 0, 0);
+  lights[1].position.set(0.75, 1, 0.5);
+  lights[2].position.set(-0.75, -1, 0.5);
+
+  scene.add(lights[0]);
+  scene.add(lights[1]);
+  scene.add(lights[2]);
 }
