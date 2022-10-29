@@ -1,6 +1,6 @@
 import * as THREE from "/js/three/three.module.js";
 
-let renderer, scene, camera, geometry, particles, planet, skelet;
+let renderer, scene, camera, geometry, material, particles, planet, skelet;
 
 window.onload = function () {
   init();
@@ -26,8 +26,6 @@ function init() {
   camera.position.z = 400;
 
   scene.add(camera);
-
-  geometry = new THREE.IcosahedronGeometry(2, 1);
 
   drawParticles();
   drawPlanet();
@@ -61,7 +59,9 @@ function animate() {
 function drawParticles() {
   particles = new THREE.Group();
 
-  const material = new THREE.MeshPhongMaterial({
+  geometry = new THREE.IcosahedronGeometry(2, 1);
+
+  material = new THREE.MeshPhongMaterial({
     color: 0xffffff,
     flatShading: true,
   });
@@ -80,26 +80,29 @@ function drawParticles() {
 }
 
 function drawPlanet() {
-  const material = new THREE.MeshPhongMaterial({
+  geometry = new THREE.IcosahedronGeometry(7, 1);
+
+  material = new THREE.MeshPhongMaterial({
     color: 0xffffff,
     flatShading: true,
   });
 
   planet = new THREE.Mesh(geometry, material);
-  planet.scale.x = planet.scale.y = planet.scale.z = 35;
+  planet.scale.x = planet.scale.y = planet.scale.z = 16;
 
   scene.add(planet);
 }
 
 function drawSkelet() {
-  const material = new THREE.MeshPhongMaterial({
+  geometry = new THREE.IcosahedronGeometry(15, 1);
+  material = new THREE.MeshPhongMaterial({
     color: 0xffffff,
     wireframe: true,
     side: THREE.DoubleSide,
   });
 
   skelet = new THREE.Mesh(geometry, material);
-  skelet.scale.x = skelet.scale.y = skelet.scale.z = 50;
+  skelet.scale.x = skelet.scale.y = skelet.scale.z = 10;
 
   scene.add(skelet);
 }
