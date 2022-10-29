@@ -1,6 +1,6 @@
 import * as THREE from "/js/three/three.module.js";
 
-let renderer, scene, camera, particles;
+let renderer, scene, camera, particles, planet;
 
 window.onload = function () {
   init();
@@ -28,14 +28,13 @@ function init() {
   scene.add(camera);
 
   particles = new THREE.Group();
-  scene.add(particles);
 
   let geometry = new THREE.IcosahedronGeometry(2, 1);
 
   let material = new THREE.MeshPhongMaterial({
     color: 0xffffff,
+    flatShading: true,
   });
-  material.flatShading = true;
 
   for (let i = 0; i < 1000; i++) {
     let mesh = new THREE.Mesh(geometry, material);
@@ -47,6 +46,17 @@ function init() {
 
     particles.add(mesh);
   }
+
+  const planetMaterial = new THREE.MeshPhongMaterial({
+    color: 0xffffff,
+    flatShading: true,
+  });
+
+  planet = new THREE.Mesh(geometry, planetMaterial);
+  planet.scale.x = planet.scale.y = planet.scale.z = 35;
+
+  scene.add(particles);
+  scene.add(planet);
 
   let lights = [];
   lights.push(new THREE.DirectionalLight(0xffffff, 1));
