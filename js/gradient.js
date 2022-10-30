@@ -122,7 +122,10 @@ function setLights() {
   lights[1].position.set(0.75, 1, 0.5);
   lights[2].position.set(-0.75, -1, 0.5);
 
-  scene.add(lights[0]);
+  const ambientLight = new THREE.AmbientLight(0x999999, 0.5);
+
+  //   scene.add(lights[0]);
   scene.add(lights[1]);
   scene.add(lights[2]);
+  scene.add(ambientLight);
 }
