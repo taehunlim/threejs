@@ -21,7 +21,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 controls.update();
 
 const loader = new GLTFLoader();
-loader.load("/assets/images/3d/car/scene.gltf", (gltf) => {
+loader.load("/models/gltf/car/scene.gltf", (gltf) => {
   scene.add(gltf.scene);
   renderer.render(scene, camera);
 
