@@ -74,6 +74,10 @@
           model = gltf.scene;
           scene.add(model);
 
+          model.traverse(function (object) {
+            if (object.isMesh) object.castShadow = true;
+          });
+
           animate();
         });
 
