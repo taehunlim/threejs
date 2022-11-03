@@ -7,7 +7,6 @@
       name="viewport"
       content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
-    <!-- <link type="text/css" rel="stylesheet" href="main.css" /> -->
     <style>
       body {
         margin: 0;
@@ -36,11 +35,21 @@
       import { GLTFLoader } from "three/addons/GLTFLoader.js";
 
       let scene, renderer, camera;
-      let model;
+      let model, mixer, clock;
+      let numAnimations;
+
+      let allActions = [];
+      const baseActions = {
+        idle: { weight: 1 },
+        walk: { weight: 0 },
+        run: { weight: 0 },
+      };
 
       init();
 
       function init() {
+        clock = new THREE.Clock();
+
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0xa0a0a0);
         scene.fog = new THREE.Fog(0xa0a0a0, 10, 50);
@@ -78,6 +87,22 @@
             if (object.isMesh) object.castShadow = true;
           });
 
+          const animations = gltf.animations;
+          mixer = new THREE.AnimationMixer(model);
+
+          numAnimations = animations.length;
+
+          for (let i = 0; i !== numAnimations; i++) {
+            const clip = animations[i];
+
+            const name = clip.name;
+
+            const action = mixer.clipAction(clip);
+
+            activateAction(action);
+            allActions.push(action);
+          }
+
           animate();
         });
 
@@ -104,7 +129,22 @@
         controls.update();
 
         window.addEventListener("resize", onWindowResize);
-        animate();
+      }
+
+      function activateAction(action) {
+        const clip = action.getClip();
+        const settings = baseActions[clip.name];
+        console.log(clip);
+        if (settings) {
+          setWeight(action, settings.weight);
+          action.play();
+        }
+      }
+
+      function setWeight(action, weight) {
+        action.enabled = true;
+        action.setEffectiveTimeScale(1);
+        action.setEffectiveWeight(weight);
       }
 
       function onWindowResize() {
@@ -116,6 +156,20 @@
 
       function animate() {
         requestAnimationFrame(animate);
+
+        for (let i = 0; i !== numAnimations; ++i) {
+          const action = allActions[i];
+
+          const clip = action.getClip();
+          const settings = baseActions[clip.name];
+
+          if (settings) {
+            settings.weight = action.getEffectiveWeight();
+          }
+        }
+        const mixerUpdateDelta = clock.getDelta();
+
+        mixer.update(mixerUpdateDelta);
 
         renderer.render(scene, camera);
       }
