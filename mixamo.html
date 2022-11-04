@@ -14,6 +14,9 @@
     </style>
   </head>
   <body>
+    <button id="idle">idle</button>
+    <button id="walk">walk</button>
+    <button id="run">run</button>
     <script
       async
       src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"
@@ -37,6 +40,8 @@
       let scene, renderer, camera;
       let model, mixer, clock;
       let numAnimations;
+
+      let currentAction;
 
       let allActions = [];
       const baseActions = {
@@ -100,10 +105,31 @@
             const action = mixer.clipAction(clip);
 
             activateAction(action);
+
+            if (baseActions[name]) {
+              baseActions[name].action = action;
+            }
             allActions.push(action);
           }
 
           animate();
+
+          const handleWeight = (e) => {
+            currentAction = baseActions[e.target.id].action;
+
+            for (const name of Object.keys(baseActions)) {
+              if (name === e.target.id) setWeight(currentAction, 1);
+              else setWeight(baseActions[name].action, 0);
+            }
+          };
+
+          const idle = document.querySelector("#idle");
+          const walk = document.querySelector("#walk");
+          const run = document.querySelector("#run");
+
+          idle.addEventListener("click", handleWeight);
+          walk.addEventListener("click", handleWeight);
+          run.addEventListener("click", handleWeight);
         });
 
         renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -134,7 +160,7 @@
       function activateAction(action) {
         const clip = action.getClip();
         const settings = baseActions[clip.name];
-        console.log(clip);
+
         if (settings) {
           setWeight(action, settings.weight);
           action.play();
