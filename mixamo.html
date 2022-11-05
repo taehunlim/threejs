@@ -45,7 +45,7 @@
 
       let allActions = [];
       const baseActions = {
-        idle: { weight: 1 },
+        idle: { weight: 0 },
         walk: { weight: 0 },
         run: { weight: 0 },
       };
@@ -115,11 +115,18 @@
           animate();
 
           const handleWeight = (e) => {
+            let beforeAction = currentAction;
             currentAction = baseActions[e.target.id].action;
 
             for (const name of Object.keys(baseActions)) {
-              if (name === e.target.id) setWeight(currentAction, 1);
-              else setWeight(baseActions[name].action, 0);
+              if (name === e.target.id) {
+                if (beforeAction) {
+                  console.log(beforeAction === currentAction);
+                  beforeAction.crossFadeTo(currentAction, 0.35, true);
+                }
+                setWeight(currentAction, 1);
+                currentAction.fadeIn(0.35);
+              }
             }
           };
 
