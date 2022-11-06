@@ -34,14 +34,15 @@
     <script type="module">
       import * as THREE from "three";
 
+      import { GUI } from "three/addons/libs/lil-gui.module.min.js";
       import { OrbitControls } from "three/addons/OrbitControls.js";
       import { GLTFLoader } from "three/addons/GLTFLoader.js";
 
       let scene, renderer, camera;
       let model, mixer, clock;
-      let numAnimations;
 
-      let currentAction;
+      const crossFadeControls = [];
+      let currentBaseAction = "idle";
 
       let allActions = [];
       const baseActions = {
@@ -49,6 +50,8 @@
         walk: { weight: 0 },
         run: { weight: 0 },
       };
+
+      let panelSettings, numAnimations;
 
       init();
 
@@ -113,30 +116,6 @@
           }
 
           animate();
-
-          const handleWeight = (e) => {
-            let beforeAction = currentAction;
-            currentAction = baseActions[e.target.id].action;
-
-            for (const name of Object.keys(baseActions)) {
-              if (name === e.target.id) {
-                if (beforeAction) {
-                  console.log(beforeAction === currentAction);
-                  beforeAction.crossFadeTo(currentAction, 0.35, true);
-                }
-                setWeight(currentAction, 1);
-                currentAction.fadeIn(0.35);
-              }
-            }
-          };
-
-          const idle = document.querySelector("#idle");
-          const walk = document.querySelector("#walk");
-          const run = document.querySelector("#run");
-
-          idle.addEventListener("click", handleWeight);
-          walk.addEventListener("click", handleWeight);
-          run.addEventListener("click", handleWeight);
         });
 
         renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -155,6 +134,8 @@
         );
         camera.position.set(-1, 2, 3);
 
+        createPanel();
+
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enablePan = false;
         controls.enableZoom = false;
@@ -162,6 +143,38 @@
         controls.update();
 
         window.addEventListener("resize", onWindowResize);
+      }
+
+      function createPanel() {
+        const panel = new GUI({ width: 310 });
+
+        const baseActionFolder = panel.addFolder("Base Actions");
+
+        panelSettings = {
+          "modify time scale": 1.0,
+        };
+
+        const baseNames = ["None", ...Object.keys(baseActions)];
+        const baseNamesLength = baseNames.length;
+
+        for (let i = 0; i !== baseNamesLength; ++i) {
+          const name = baseNames[i];
+          const settings = baseActions[name];
+
+          panelSettings[name] = () => {
+            const currentSettings = baseActions[currentBaseAction];
+            const currentAction = currentSettings
+              ? currentSettings.action
+              : null;
+            const action = settings ? settings.action : null;
+
+            if (currentAction !== action) {
+              prepareCrossFade(currentAction, action, 0.35);
+            }
+          };
+
+          crossFadeControls.push(baseActionFolder.add(panelSettings, name));
+        }
       }
 
       function activateAction(action) {
@@ -172,6 +185,31 @@
           setWeight(action, settings.weight);
           action.play();
         }
+      }
+
+      function prepareCrossFade(startAction, endAction, duration) {
+        executeCrossFade(startAction, endAction, duration);
+
+        if (endAction) {
+          const clip = endAction.getClip();
+          currentBaseAction = clip.name;
+        } else {
+          currentBaseAction = "None";
+        }
+      }
+
+      function executeCrossFade(startAction, endAction, duration) {
+        if (endAction) {
+          setWeight(endAction, 1);
+          endAction.time = 0;
+
+          if (startAction) {
+            return startAction.crossFadeTo(endAction, duration, true);
+          }
+          return endAction.fadeIn(duration);
+        }
+
+        startAction.fadeOut(duration);
       }
 
       function setWeight(action, weight) {
