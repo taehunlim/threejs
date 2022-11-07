@@ -149,10 +149,12 @@
         const panel = new GUI({ width: 310 });
 
         const baseActionFolder = panel.addFolder("Base Actions");
-        const speedPanel = panel.addFolder("Speed");
+        const pauseFolder = panel.addFolder("pausing");
+        const speedFolder = panel.addFolder("Speed");
 
         panelSettings = {
           "time scale": 1.0,
+          "pause/continue": pauseContinue,
         };
 
         const baseNames = ["None", ...Object.keys(baseActions)];
@@ -176,11 +178,12 @@
 
           crossFadeControls.push(baseActionFolder.add(panelSettings, name));
         }
-        crossFadeControls.push(
-          speedPanel
-            .add(panelSettings, "time scale", 0.0, 1.5, 0.01)
-            .onChange(modifyTimeScale)
-        );
+
+        pauseFolder.add(panelSettings, "pause/continue");
+
+        speedFolder
+          .add(panelSettings, "time scale", 0.0, 1.5, 0.01)
+          .onChange(modifyTimeScale);
 
         crossFadeControls.forEach((control) => {
           control.setInactive = () => {
@@ -207,6 +210,13 @@
           setWeight(action, settings.weight);
           action.play();
         }
+      }
+
+      function pauseContinue() {
+        allActions.forEach((action) => {
+          if (action.paused) action.paused = false;
+          else action.paused = true;
+        });
       }
 
       function modifyTimeScale(speed) {
