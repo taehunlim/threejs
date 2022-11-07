@@ -149,9 +149,10 @@
         const panel = new GUI({ width: 310 });
 
         const baseActionFolder = panel.addFolder("Base Actions");
+        const speedPanel = panel.addFolder("Speed");
 
         panelSettings = {
-          "modify time scale": 1.0,
+          "time scale": 1.0,
         };
 
         const baseNames = ["None", ...Object.keys(baseActions)];
@@ -175,6 +176,11 @@
 
           crossFadeControls.push(baseActionFolder.add(panelSettings, name));
         }
+        crossFadeControls.push(
+          speedPanel
+            .add(panelSettings, "time scale", 0.0, 1.5, 0.01)
+            .onChange(modifyTimeScale)
+        );
 
         crossFadeControls.forEach((control) => {
           control.setInactive = () => {
@@ -201,6 +207,10 @@
           setWeight(action, settings.weight);
           action.play();
         }
+      }
+
+      function modifyTimeScale(speed) {
+        mixer.timeScale = speed;
       }
 
       function prepareCrossFade(startAction, endAction, duration) {
