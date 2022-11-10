@@ -1,12 +1,19 @@
 import * as THREE from "/js/three/three.module.js";
 import { OrbitControls } from "/js/three/OrbitControls.js";
+import { FontLoader } from "/js/three/FontLoader.js";
+import { TextGeometry } from "/js/three/TextGeometry.js";
 
 let renderer, scene, camera, geometry, material, particles;
+let font;
 
-window.onload = function () {
+const fontLoader = new FontLoader();
+const fontPath = "/js/three/fonts/";
+
+fontLoader.load(fontPath + "gentilis_bold.typeface.json", (f) => {
+  font = f;
   init();
   animate();
-};
+});
 
 function init() {
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -48,11 +55,17 @@ function onWindowResize() {
 function drawParticles() {
   particles = new THREE.Group();
 
-  geometry = new THREE.IcosahedronGeometry(2, 1);
+  geometry = new TextGeometry("text", {
+    font: font, // fontLoader를 통해 얻어온 폰트 객체
+    size: 10, // mesh의 크기 (기본 값 100)
+    height: 0, // 깊이(z) (기본 값 50)
+    curveSegments: 10, // 하나의 커브를 구성하는 정점의 개수 (기본 값 12) = 값이 높을 수록 완벽한 곡선
+  });
+  geometry.computeBoundingBox();
 
-  material = new THREE.MeshPhongMaterial({
-    color: 0xffffff,
-    flatShading: true,
+  material = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    wireframe: true,
   });
 
   for (let i = 0; i < 100; i++) {
@@ -61,7 +74,7 @@ function drawParticles() {
     mesh.position
       .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
       .normalize();
-    mesh.position.multiplyScalar(90 + Math.random() * 100);
+    mesh.position.multiplyScalar(90 + Math.random() * 10);
 
     particles.add(mesh);
   }
@@ -77,8 +90,8 @@ function setLights() {
 function animate() {
   requestAnimationFrame(animate);
 
-  particles.rotation.x += 0.0;
-  particles.rotation.y -= 0.004;
+  // particles.rotation.x += 0.0;
+  // particles.rotation.y -= 0.004;
 
   renderer.clear();
 
