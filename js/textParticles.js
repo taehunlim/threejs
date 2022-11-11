@@ -6,6 +6,17 @@ import { TextGeometry } from "/js/three/TextGeometry.js";
 let renderer, scene, camera, geometry, material, particles;
 let font;
 
+const texts = [
+  { label: "html" },
+  { label: "css3" },
+  { label: "sass" },
+  { label: "javascript" },
+  { label: "react" },
+  { label: "git" },
+  { label: "github" },
+  { label: "restful apis" },
+];
+
 const fontLoader = new FontLoader();
 const fontPath = "/js/three/fonts/";
 
@@ -55,21 +66,22 @@ function onWindowResize() {
 function drawParticles() {
   particles = new THREE.Group();
 
-  geometry = new TextGeometry("text", {
-    font: font, // fontLoader를 통해 얻어온 폰트 객체
-    size: 10, // mesh의 크기 (기본 값 100)
-    height: 0, // 깊이(z) (기본 값 50)
-    curveSegments: 10, // 하나의 커브를 구성하는 정점의 개수 (기본 값 12) = 값이 높을 수록 완벽한 곡선
-  });
-  geometry.computeBoundingBox();
-
   material = new THREE.MeshBasicMaterial({
     color: 0x000000,
     wireframe: true,
   });
 
-  for (let i = 0; i < 100; i++) {
-    let mesh = new THREE.Mesh(geometry, material);
+  geometry = (text) =>
+    new TextGeometry(text || "text", {
+      font: font, // fontLoader를 통해 얻어온 폰트 객체
+      size: 10, // mesh의 크기 (기본 값 100)
+      height: 0, // 깊이(z) (기본 값 50)
+      curveSegments: 10, // 하나의 커브를 구성하는 정점의 개수 (기본 값 12) = 값이 높을 수록 완벽한 곡선
+    });
+  geometry().computeBoundingBox();
+
+  for (let i = 0; i < texts.length * 100; i++) {
+    let mesh = new THREE.Mesh(geometry(texts[i % 8].label), material);
 
     mesh.position
       .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
