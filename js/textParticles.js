@@ -71,22 +71,24 @@ function drawParticles() {
     wireframe: true,
   });
 
-  geometry = (text) =>
-    new TextGeometry(text || "text", {
-      font: font, // fontLoader를 통해 얻어온 폰트 객체
-      size: 10, // mesh의 크기 (기본 값 100)
-      height: 0, // 깊이(z) (기본 값 50)
-      curveSegments: 10, // 하나의 커브를 구성하는 정점의 개수 (기본 값 12) = 값이 높을 수록 완벽한 곡선
-    });
-  geometry().computeBoundingBox();
+  geometry = new TextGeometry("long text test", {
+    font: font, // fontLoader를 통해 얻어온 폰트 객체
+    size: 10, // mesh의 크기 (기본 값 100)
+    height: 0, // 깊이(z) (기본 값 50)
+    curveSegments: 10, // 하나의 커브를 구성하는 정점의 개수 (기본 값 12) = 값이 높을 수록 완벽한 곡선
+  });
+  geometry.computeBoundingBox();
 
   for (let i = 0; i < texts.length * 100; i++) {
-    let mesh = new THREE.Mesh(geometry(texts[i % 8].label), material);
+    let mesh = new THREE.Mesh(geometry, material);
+    const textWidth = mesh.geometry.boundingBox.max.x;
 
     mesh.position
       .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
       .normalize();
-    mesh.position.multiplyScalar(90 + Math.random() * 10);
+
+    mesh.position.multiplyScalar(90 + Math.random() * 1);
+    mesh.position.x = mesh.position.x - textWidth / 2;
 
     particles.add(mesh);
   }
