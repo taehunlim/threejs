@@ -5,6 +5,7 @@ import { TextGeometry } from "/js/three/TextGeometry.js";
 
 let renderer, scene, camera, geometry, material, particles;
 let font;
+let geometries = [];
 
 const texts = [
   { label: "html" },
@@ -71,22 +72,28 @@ function drawParticles() {
     wireframe: true,
   });
 
-  geometry = new TextGeometry("long text test", {
-    font: font, // fontLoader를 통해 얻어온 폰트 객체
-    size: 10, // mesh의 크기 (기본 값 100)
-    height: 0, // 깊이(z) (기본 값 50)
-    curveSegments: 10, // 하나의 커브를 구성하는 정점의 개수 (기본 값 12) = 값이 높을 수록 완벽한 곡선
-  });
-  geometry.computeBoundingBox();
+  const textLength = texts.length;
+  const repeat = 100;
+  for (let i = 0, j = textLength * repeat; i < j; i++) {
+    if (i < textLength) {
+      const geometry = new TextGeometry(texts[i].label, {
+        font: font, // fontLoader를 통해 얻어온 폰트 객체
+        size: 10, // mesh의 크기 (기본 값 100)
+        height: 0, // 깊이(z) (기본 값 50)
+        curveSegments: 10, // 하나의 커브를 구성하는 정점의 개수 (기본 값 12) = 값이 높을 수록 완벽한 곡선
+      });
+      geometry.computeBoundingBox();
 
-  for (let i = 0; i < texts.length * 100; i++) {
+      geometries.push(geometry);
+    }
+
+    geometry = geometries[i % textLength];
     let mesh = new THREE.Mesh(geometry, material);
     const textWidth = mesh.geometry.boundingBox.max.x;
 
     mesh.position
       .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
       .normalize();
-
     mesh.position.multiplyScalar(90 + Math.random() * 1);
     mesh.position.x = mesh.position.x - textWidth / 2;
 
