@@ -9,6 +9,7 @@ let geometries = [];
 
 let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
+let currentTarget;
 
 const texts = [
   { label: "html", url: "https://www.naver.com/" },
@@ -141,13 +142,15 @@ function onMouseMove(event) {
   if (intersects.length > 0) {
     const { object } = intersects[0];
 
+    currentTarget = object;
+
     object.scale.x = 1.5;
     object.scale.y = 1.5;
   } else {
-    particles.children.forEach((particle) => {
-      particle.scale.x = 1;
-      particle.scale.y = 1;
-    });
+    if (currentTarget) {
+      currentTarget.scale.x = 1;
+      currentTarget.scale.y = 1;
+    }
   }
 }
 
