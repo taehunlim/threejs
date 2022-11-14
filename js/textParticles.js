@@ -60,6 +60,7 @@ function init() {
   controls.minDistance = 50;
   window.addEventListener("resize", onWindowResize, false);
   document.addEventListener("click", onMouseClick, false);
+  document.addEventListener("mousemove", onMouseMove, false);
 }
 
 function onWindowResize() {
@@ -86,10 +87,10 @@ function drawParticles() {
         height: 0, // 깊이(z) (기본 값 50)
         curveSegments: 10, // 하나의 커브를 구성하는 정점의 개수 (기본 값 12) = 값이 높을 수록 완벽한 곡선
       });
-      geometry.computeBoundingBox();
 
+      geometry.computeBoundingBox();
       geometry.url = texts[i].url;
-      console.log(geometry);
+
       geometries.push(geometry);
     }
 
@@ -127,6 +128,26 @@ function onMouseClick(event) {
     const { url } = object.geometry;
 
     window.open(url);
+  }
+}
+
+function onMouseMove(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersects = raycaster.intersectObject(particles);
+  if (intersects.length > 0) {
+    const { object } = intersects[0];
+
+    object.scale.x = 1.5;
+    object.scale.y = 1.5;
+  } else {
+    particles.children.forEach((particle) => {
+      particle.scale.x = 1;
+      particle.scale.y = 1;
+    });
   }
 }
 
