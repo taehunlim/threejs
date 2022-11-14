@@ -7,15 +7,18 @@ let renderer, scene, camera, geometry, material, particles;
 let font;
 let geometries = [];
 
+let raycaster = new THREE.Raycaster();
+let mouse = new THREE.Vector2();
+
 const texts = [
-  { label: "html" },
-  { label: "css3" },
-  { label: "sass" },
-  { label: "javascript" },
-  { label: "react" },
-  { label: "git" },
-  { label: "github" },
-  { label: "restful apis" },
+  { label: "html", url: "https://www.naver.com/" },
+  { label: "css3", url: "https://www.naver.com/" },
+  { label: "sass", url: "https://www.naver.com/" },
+  { label: "javascript", url: "https://www.naver.com/" },
+  { label: "react", url: "https://www.naver.com/" },
+  { label: "git", url: "https://www.naver.com/" },
+  { label: "github", url: "https://www.naver.com/" },
+  { label: "restful apis", url: "https://www.naver.com/" },
 ];
 
 const fontLoader = new FontLoader();
@@ -56,6 +59,7 @@ function init() {
   controls.maxDistance = 1000;
   controls.minDistance = 50;
   window.addEventListener("resize", onWindowResize, false);
+  document.addEventListener("click", onMouseClick, false);
 }
 
 function onWindowResize() {
@@ -73,7 +77,7 @@ function drawParticles() {
   });
 
   const textLength = texts.length;
-  const repeat = 100;
+  const repeat = 1;
   for (let i = 0, j = textLength * repeat; i < j; i++) {
     if (i < textLength) {
       const geometry = new TextGeometry(texts[i].label, {
@@ -84,6 +88,8 @@ function drawParticles() {
       });
       geometry.computeBoundingBox();
 
+      geometry.url = texts[i].url;
+      console.log(geometry);
       geometries.push(geometry);
     }
 
@@ -99,6 +105,7 @@ function drawParticles() {
 
     particles.add(mesh);
   }
+
   scene.add(particles);
 }
 
@@ -108,9 +115,25 @@ function setLights() {
   scene.add(ambientLight);
 }
 
+function onMouseClick(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersects = raycaster.intersectObject(particles);
+  if (intersects.length > 0) {
+    const { object } = intersects[0];
+    const { url } = object.geometry;
+
+    window.open(url);
+  }
+}
+
 function animate() {
   requestAnimationFrame(animate);
 
+  // meshs[0].rotation.x += 1;
   // particles.rotation.x += 0.0;
   // particles.rotation.y -= 0.004;
 
