@@ -3,23 +3,24 @@ import { OrbitControls } from "/js/three/OrbitControls.js";
 import { FontLoader } from "/js/three/FontLoader.js";
 import { TextGeometry } from "/js/three/TextGeometry.js";
 
-let renderer, scene, camera, geometry, material, particles;
+let renderer, scene, camera, mesh, geometry, material, particles, particleBgs;
 let font;
 let geometries = [];
+let labelId;
 
 let raycaster = new THREE.Raycaster();
 let pointer = new THREE.Vector2();
 let currentTarget;
 
 const texts = [
-  { label: "html", url: "https://www.naver.com/" },
-  { label: "css3", url: "https://www.naver.com/" },
-  { label: "sass", url: "https://www.naver.com/" },
-  { label: "javascript", url: "https://www.naver.com/" },
-  { label: "react", url: "https://www.naver.com/" },
-  { label: "git", url: "https://www.naver.com/" },
-  { label: "github", url: "https://www.naver.com/" },
-  { label: "restful apis", url: "https://www.naver.com/" },
+  { id: 0, label: "html", url: "https://www.naver.com/" },
+  { id: 1, label: "css3", url: "https://www.naver.com/" },
+  { id: 3, label: "sass", url: "https://www.naver.com/" },
+  { id: 4, label: "javascript", url: "https://www.naver.com/" },
+  { id: 5, label: "react", url: "https://www.naver.com/" },
+  { id: 6, label: "git", url: "https://www.naver.com/" },
+  { id: 7, label: "github", url: "https://www.naver.com/" },
+  { id: 8, label: "restful apis", url: "https://www.naver.com/" },
 ];
 
 const fontLoader = new FontLoader();
@@ -72,6 +73,7 @@ function onWindowResize() {
 
 function drawParticles() {
   particles = new THREE.Group();
+  particleBgs = new THREE.Group();
 
   material = new THREE.MeshBasicMaterial({
     color: 0x000000,
@@ -91,13 +93,18 @@ function drawParticles() {
 
       geometry.computeBoundingBox();
       geometry.url = texts[i].url;
+      geometry.textId = texts[i].id;
+
+      labelId = texts[i].id;
 
       geometries.push(geometry);
     }
 
     geometry = geometries[i % textLength];
-    let mesh = new THREE.Mesh(geometry, material);
-    const textWidth = mesh.geometry.boundingBox.max.x;
+    mesh = new THREE.Mesh(geometry, material);
+
+    const textSize = mesh.geometry.boundingBox.max;
+    const { x: textWidth } = textSize;
 
     mesh.position
       .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
@@ -105,10 +112,38 @@ function drawParticles() {
     mesh.position.multiplyScalar(90 + Math.random() * 1);
     mesh.position.x = mesh.position.x - textWidth / 2;
 
+    mesh.labelId = labelId;
+
     particles.add(mesh);
+
+    drawPlaneForText(mesh);
   }
 
   scene.add(particles);
+  scene.add(particleBgs);
+}
+
+function drawPlaneForText(textMesh) {
+  const { x, y } = textMesh.geometry.boundingBox.max;
+
+  const geometry = new THREE.PlaneGeometry(x, y);
+  const material = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    wireframe: true,
+  });
+
+  mesh = new THREE.Mesh(geometry, material);
+
+  mesh.position.set(
+    textMesh.position.x,
+    textMesh.position.y,
+    textMesh.position.z
+  );
+  mesh.position.x = textMesh.position.x + x / 2;
+  mesh.position.y = textMesh.position.y + y / 2;
+
+  mesh.labelId = labelId;
+  particleBgs.add(mesh);
 }
 
 function setLights() {
@@ -139,14 +174,18 @@ function handlePointer(event) {
 function handleHoverEvent() {
   raycaster.setFromCamera(pointer, camera);
 
-  const intersects = raycaster.intersectObject(particles);
+  const intersects = raycaster.intersectObject(particleBgs);
+
   if (intersects.length > 0) {
     const { object } = intersects[0];
 
-    currentTarget = object;
+    const currentTextMesh = particles.children.filter(
+      (r) => r.labelId === object.labelId
+    )[0];
 
-    object.scale.x = 1.5;
-    object.scale.y = 1.5;
+    currentTarget = currentTextMesh;
+    currentTarget.scale.x = 1.5;
+    currentTarget.scale.y = 1.5;
   } else {
     if (currentTarget) {
       currentTarget.scale.x = 1;
