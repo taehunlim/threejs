@@ -8,7 +8,7 @@ let font;
 let geometries = [];
 
 let raycaster = new THREE.Raycaster();
-let mouse = new THREE.Vector2();
+let pointer = new THREE.Vector2();
 let currentTarget;
 
 const texts = [
@@ -61,7 +61,7 @@ function init() {
   controls.minDistance = 50;
   window.addEventListener("resize", onWindowResize, false);
   document.addEventListener("click", onMouseClick, false);
-  document.addEventListener("mousemove", onMouseMove, false);
+  document.addEventListener("mousemove", handlePointer, false);
 }
 
 function onWindowResize() {
@@ -83,9 +83,9 @@ function drawParticles() {
   for (let i = 0, j = textLength * repeat; i < j; i++) {
     if (i < textLength) {
       const geometry = new TextGeometry(texts[i].label, {
-        font: font, // fontLoader를 통해 얻어온 폰트 객체
-        size: 10, // mesh의 크기 (기본 값 100)
-        height: 0, // 깊이(z) (기본 값 50)
+        font: font,
+        size: 10,
+        height: 0,
         curveSegments: 10, // 하나의 커브를 구성하는 정점의 개수 (기본 값 12) = 값이 높을 수록 완벽한 곡선
       });
 
@@ -118,10 +118,7 @@ function setLights() {
 }
 
 function onMouseClick(event) {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
+  raycaster.setFromCamera(pointer, camera);
 
   const intersects = raycaster.intersectObject(particles);
   if (intersects.length > 0) {
@@ -132,11 +129,15 @@ function onMouseClick(event) {
   }
 }
 
-function onMouseMove(event) {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+function handlePointer(event) {
+  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-  raycaster.setFromCamera(mouse, camera);
+  handleHoverEvent();
+}
+
+function handleHoverEvent() {
+  raycaster.setFromCamera(pointer, camera);
 
   const intersects = raycaster.intersectObject(particles);
   if (intersects.length > 0) {
@@ -156,7 +157,6 @@ function onMouseMove(event) {
 
 function animate() {
   requestAnimationFrame(animate);
-
   // meshs[0].rotation.x += 1;
   // particles.rotation.x += 0.0;
   // particles.rotation.y -= 0.004;
