@@ -10,7 +10,7 @@ let labelId;
 
 let raycaster = new THREE.Raycaster();
 let pointer = new THREE.Vector2();
-let currentTarget;
+let currentTargets = [];
 
 const texts = [
   { id: 0, label: "html", url: "https://www.naver.com/" },
@@ -177,19 +177,33 @@ function handleHoverEvent() {
   const intersects = raycaster.intersectObject(particleBgs);
 
   if (intersects.length > 0) {
-    const { object } = intersects[0];
+    const intersectedTextMesh = particles.children.filter((textMesh) => {
+      const isIntersectedMesh = intersects.some(
+        (intersect) => intersect.object.labelId === textMesh.labelId
+      );
 
-    const currentTextMesh = particles.children.filter(
-      (r) => r.labelId === object.labelId
-    )[0];
+      if (isIntersectedMesh) {
+        textMesh.scale.x = 1.5;
+        textMesh.scale.y = 1.5;
+      } else {
+        if (textMesh.scale.x === 1.5) {
+          textMesh.scale.x = 1;
+          textMesh.scale.y = 1;
+        }
+      }
 
-    currentTarget = currentTextMesh;
-    currentTarget.scale.x = 1.5;
-    currentTarget.scale.y = 1.5;
+      return isIntersectedMesh;
+    });
+
+    if (currentTargets !== intersectedTextMesh) {
+      currentTargets = intersectedTextMesh;
+    }
   } else {
-    if (currentTarget) {
-      currentTarget.scale.x = 1;
-      currentTarget.scale.y = 1;
+    if (currentTargets.length) {
+      currentTargets.forEach((mesh) => {
+        mesh.scale.x = 1;
+        mesh.scale.y = 1;
+      });
     }
   }
 }
