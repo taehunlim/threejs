@@ -13,8 +13,8 @@ let pointer = new THREE.Vector2();
 let currentTargets = [];
 
 const texts = [
-  { id: 0, label: "html", url: "https://www.naver.com/" },
-  { id: 1, label: "css3", url: "https://www.naver.com/" },
+  { id: 1, label: "html", url: "https://www.naver.com/" },
+  { id: 2, label: "css3", url: "https://www.naver.com/" },
   { id: 3, label: "sass", url: "https://www.naver.com/" },
   { id: 4, label: "javascript", url: "https://www.naver.com/" },
   { id: 5, label: "react", url: "https://www.naver.com/" },
@@ -52,7 +52,7 @@ function init() {
 
   scene.add(camera);
 
-  drawParticles();
+  drawParticles(10);
 
   setLights();
 
@@ -71,7 +71,7 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function drawParticles() {
+function drawParticles(repeat = 1) {
   particles = new THREE.Group();
   particleBgs = new THREE.Group();
 
@@ -81,7 +81,7 @@ function drawParticles() {
   });
 
   const textLength = texts.length;
-  const repeat = 1;
+  const isRepeat = repeat > 1;
   for (let i = 0, j = textLength * repeat; i < j; i++) {
     if (i < textLength) {
       const geometry = new TextGeometry(texts[i].label, {
@@ -90,17 +90,19 @@ function drawParticles() {
         height: 0,
         curveSegments: 10, // 하나의 커브를 구성하는 정점의 개수 (기본 값 12) = 값이 높을 수록 완벽한 곡선
       });
-
       geometry.computeBoundingBox();
-      geometry.url = texts[i].url;
-      geometry.textId = texts[i].id;
-
-      labelId = texts[i].id;
 
       geometries.push(geometry);
     }
 
     geometry = geometries[i % textLength];
+    geometry.url = isRepeat ? texts[i % textLength].url : texts[i].url;
+    geometry.textId = isRepeat
+      ? texts[i % textLength].id + Math.floor(i / 8) * 8
+      : texts[i].id;
+
+    labelId = geometry.textId;
+
     mesh = new THREE.Mesh(geometry, material);
 
     const textSize = mesh.geometry.boundingBox.max;
