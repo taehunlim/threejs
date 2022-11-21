@@ -7,10 +7,10 @@ let renderer, scene, camera, mesh, geometry, material, particles, particleBgs;
 let font;
 let geometries = [];
 let labelId;
+let isStop = true;
 
 let raycaster = new THREE.Raycaster();
 let pointer = new THREE.Vector2();
-let currentTargets = [];
 
 const texts = [
   { id: 1, label: "html", url: "https://www.naver.com/" },
@@ -52,7 +52,7 @@ function init() {
 
   scene.add(camera);
 
-  drawParticles(10);
+  drawParticles();
 
   setLights();
 
@@ -144,6 +144,8 @@ function drawPlaneForText(textMesh) {
   mesh.position.x = textMesh.position.x + x / 2;
   mesh.position.y = textMesh.position.y + y / 2;
 
+  mesh.visible = false;
+
   mesh.labelId = labelId;
   particleBgs.add(mesh);
 }
@@ -179,16 +181,17 @@ function handleHoverEvent() {
   const intersects = raycaster.intersectObject(particleBgs);
 
   if (intersects.length > 0) {
-    const intersectedTextMesh = particles.children.filter((textMesh) => {
+    particles.children.filter((textMesh) => {
+      isStop = false;
+
       const isIntersectedMesh = intersects.some(
         (intersect) => intersect.object.labelId === textMesh.labelId
       );
 
       if (isIntersectedMesh) {
-        textMesh.scale.x = 1.5;
-        textMesh.scale.y = 1.5;
+        scaleAnimation(textMesh);
       } else {
-        if (textMesh.scale.x === 1.5) {
+        if (textMesh.scale.x > 1) {
           textMesh.scale.x = 1;
           textMesh.scale.y = 1;
         }
@@ -196,27 +199,34 @@ function handleHoverEvent() {
 
       return isIntersectedMesh;
     });
-
-    if (currentTargets !== intersectedTextMesh) {
-      currentTargets = intersectedTextMesh;
-    }
   } else {
-    if (currentTargets.length) {
-      currentTargets.forEach((mesh) => {
-        mesh.scale.x = 1;
-        mesh.scale.y = 1;
+    if (!isStop) {
+      isStop = true;
+
+      particles.children.forEach((mesh) => {
+        if (mesh.scale.x > 1) {
+          mesh.scale.x = 1;
+          mesh.scale.y = 1;
+        }
       });
     }
+  }
+
+  function scaleAnimation(mesh) {
+    let i = setInterval(() => {
+      if (mesh.scale.x >= 1.5 || isStop) {
+        return clearInterval(i);
+      }
+
+      mesh.scale.x += 0.01;
+      mesh.scale.y += 0.01;
+    });
   }
 }
 
 function animate() {
   requestAnimationFrame(animate);
-  // meshs[0].rotation.x += 1;
-  // particles.rotation.x += 0.0;
-  // particles.rotation.y -= 0.004;
 
   renderer.clear();
-
   renderer.render(scene, camera);
 }
